@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   ArrowUpRight,
@@ -63,6 +63,14 @@ export default function Dashboard() {
   const { data, error, loading, rateLimited, retryAt, reload } =
     useGitHubData();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentYear, setCurrentYear] = useState(2026);
+
+  useEffect(() => {
+    const actualCurrentYear = new Date().getUTCFullYear();
+    setCurrentYear((year) =>
+      year === actualCurrentYear ? year : actualCurrentYear
+    );
+  }, []);
 
   const filteredRepositories = useMemo(() => {
     const repositories = data?.repositories ?? [];
@@ -95,6 +103,7 @@ export default function Dashboard() {
     data?.contributions.available === true
       ? data.contributions.totalContributions
       : null;
+  const contributionYear = data?.contributions.year ?? currentYear;
 
   const metrics: {
     label: string;
@@ -121,7 +130,7 @@ export default function Dashboard() {
       Icon: Star,
     },
     {
-      label: `${data?.contributions.year ?? new Date().getUTCFullYear()} contributions`,
+      label: `${contributionYear} contributions`,
       value: recentContributionCount,
       detail: "GitHub contribution calendar",
       Icon: GitCommitHorizontal,
@@ -597,7 +606,7 @@ export default function Dashboard() {
 
       <GitHubContributionCalendar
         calendar={data?.contributions ?? null}
-        year={data?.contributions.year ?? new Date().getUTCFullYear()}
+        year={contributionYear}
         loading={loading}
         linkHref="/github"
       />
