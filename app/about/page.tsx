@@ -1,187 +1,93 @@
 "use client";
 
-import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpenCheck,
-  Briefcase,
-  Code2,
-  Lightbulb,
-  GraduationCap,
-} from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
-import { PageHeader, PageLayout } from "@/components/PageLayout";
+import { useRef } from "react";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 
-const highlights = [
-  {
-    title: "Web development",
-    description: "Building responsive interfaces using React and Next.js.",
-    Icon: Code2,
-  },
-  {
-    title: "Problem-solving",
-    description:
-      "Applying issue resolution and analytical thinking to practical challenges.",
-    Icon: Lightbulb,
-  },
-  {
-    title: "Continuous learning",
-    description: "Improving technical skills through hands-on projects.",
-    Icon: BookOpenCheck,
-  },
+const aboutParagraphs = [
+  "I'm a Computer Science Engineering graduate interested in building thoughtful, user-friendly digital experiences. I enjoy working with React and Next.js to create responsive interfaces that combine functionality with clean design.",
+  "My experience in customer support and logistics operations has strengthened my communication, problem-solving, and coordination skills. I bring that practical experience into my technical learning, building projects and continuously improving my development skills.",
 ];
 
+const paragraphClassName =
+  "text-[clamp(1.2rem,2.1vw,1.8rem)] font-semibold leading-[1.45] tracking-[-0.035em]";
+
 export default function AboutPage() {
+  const textRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const revealInitial =
-    prefersReducedMotion === true ? false : { opacity: 0, y: 14 };
+  const { scrollYProgress } = useScroll({
+    target: textRef,
+    offset: ["start 85%", "end 25%"],
+  });
+  const revealClip = useTransform(
+    scrollYProgress,
+    [0, 1],
+    ["inset(0 100% 0 0)", "inset(0 0% 0 0)"]
+  );
 
   return (
-    <PageLayout className="space-y-7 sm:space-y-8">
-      <PageHeader
-        eyebrow="About me"
-        title="Hi, I'm Shahbaj Khan."
-        description="My path from Computer Science Engineering to customer operations and hands-on web development."
-      />
-
-      <motion.section
-        aria-labelledby="about-introduction-heading"
-        initial={revealInitial}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
-        className="relative overflow-hidden rounded-2xl border border-[#E8DDBB] bg-[#FFFDF0] p-5 shadow-[0_12px_34px_rgba(58,46,14,0.06)] sm:p-7 lg:p-8"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-1 bg-[#B08D35]"
-        />
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(240px,0.75fr)] lg:items-center lg:gap-8">
-          <div className="min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#80631F]">
-              Introduction
+    <section className="min-h-[100svh] w-full bg-[#FFFAD8] text-[#191919]">
+      <div className="mx-auto grid min-h-[100svh] max-w-[1600px] grid-cols-1 gap-10 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[minmax(0,1.75fr)_minmax(180px,0.75fr)] md:items-center md:gap-12 md:px-14 md:py-14 xl:gap-16 xl:px-24">
+        <div className="flex flex-col justify-between gap-12 md:self-stretch md:py-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#77745F] sm:text-sm">
+              Computer Science Graduate
             </p>
-            <h2
-              id="about-introduction-heading"
-              className="mt-2 text-xl font-extrabold tracking-tight text-[#191919] sm:text-2xl"
+            <h1 className="mt-3 text-[clamp(2.5rem,5.5vw,5rem)] font-bold leading-[1.05] tracking-[-0.06em]">
+              About Me
+            </h1>
+
+            <div
+              ref={textRef}
+              className="relative mt-8 max-w-4xl space-y-7 sm:mt-10 sm:space-y-8"
             >
-              A background in technology and operations
-            </h2>
-            <div className="mt-4 max-w-2xl space-y-3 text-[15px] leading-7 text-[#625D4C]">
-              <p>
-                I&apos;m a Computer Science Engineering graduate interested in
-                web development and user-friendly digital experiences. I&apos;ve
-                built responsive interfaces using React and Next.js.
-              </p>
-              <p>
-                I&apos;ve also worked in customer support and logistics
-                operations. Through that experience, I&apos;ve developed
-                communication, problem-solving, issue-resolution, and
-                coordination skills.
-              </p>
+              <div className="space-y-7 sm:space-y-8">
+                {aboutParagraphs.map((paragraph) => (
+                  <p key={paragraph} className={paragraphClassName}>
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+
+              {prefersReducedMotion !== true && (
+                <motion.div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 space-y-7 bg-[linear-gradient(100deg,#16834a_0%,#25a766_48%,#6bc58f_100%)] bg-clip-text text-transparent sm:space-y-8"
+                  style={{ clipPath: revealClip }}
+                >
+                  {aboutParagraphs.map((paragraph) => (
+                    <p key={paragraph} className={paragraphClassName}>
+                      {paragraph}
+                    </p>
+                  ))}
+                </motion.div>
+              )}
             </div>
-            <Link
-              href="/projects"
-              className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#191919] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#423A28] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B08D35] sm:px-5"
-            >
-              View my projects
-              <ArrowRight aria-hidden="true" size={16} />
-            </Link>
           </div>
 
-          <aside
-            aria-label="Education and work background"
-            className="rounded-xl border border-[#E8DDBB] bg-[#FBF6E3] p-4 sm:p-5"
-          >
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#80631F]">
-              At a glance
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#77745F]">
+              About me
             </p>
-            <div className="mt-4 space-y-4">
-              <div className="flex items-start gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-[#E5D8AD] bg-[#FFFDF0] text-[#947123]">
-                  <GraduationCap aria-hidden="true" size={19} />
-                </span>
-                <div className="min-w-0 pt-0.5">
-                  <p className="text-xs font-semibold text-[#706951]">
-                    Education
-                  </p>
-                  <p className="mt-1 text-sm font-bold leading-5 text-[#191919]">
-                    Computer Science Engineering graduate
-                  </p>
-                </div>
-              </div>
-              <div className="h-px bg-[#E8DDBB]" />
-              <div className="flex items-start gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-[#E5D8AD] bg-[#FFFDF0] text-[#947123]">
-                  <Briefcase aria-hidden="true" size={19} />
-                </span>
-                <div className="min-w-0 pt-0.5">
-                  <p className="text-xs font-semibold text-[#706951]">
-                    Professional experience
-                  </p>
-                  <p className="mt-1 text-sm font-bold leading-5 text-[#191919]">
-                    Customer support and logistics operations
-                  </p>
-                </div>
-              </div>
-            </div>
-          </aside>
+            <p className="mt-2 font-serif text-3xl italic tracking-[-0.035em] sm:text-4xl">
+              Shahbaj Khan
+            </p>
+          </div>
         </div>
-      </motion.section>
 
-      <section aria-labelledby="about-highlights-heading">
-        <motion.div
-          initial={revealInitial}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: prefersReducedMotion ? 0 : 0.08 }}
-          className="mb-4"
+        <div
+          role="img"
+          aria-label="Portrait placeholder; replace with a personal portrait"
+          className="mx-auto flex aspect-[4/5] w-full max-w-[440px] items-center justify-center border border-[#E5DFAF] bg-[#F3EFCF] px-6 text-center md:mx-0 md:max-w-none"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#80631F]">
-            Highlights
-          </p>
-          <h2
-            id="about-highlights-heading"
-            className="mt-1 text-xl font-extrabold text-[#191919] sm:text-2xl"
-          >
-            What shapes my work
-          </h2>
-        </motion.div>
+          <span className="text-xs font-medium uppercase tracking-[0.16em] text-[#77745F]">
+            <img
+              src="/logo.jpg"
+              alt="Shahbaj Khan in a professional portrait, facing forward with a calm and confident expression, wearing a dark shirt, set in a simple studio style environment."
+            />
 
-        <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {highlights.map(({ title, description, Icon }, index) => (
-            <motion.article
-              key={title}
-              initial={revealInitial}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.38,
-                delay: prefersReducedMotion ? 0 : 0.12 + index * 0.08,
-                ease: "easeOut",
-              }}
-              whileHover={
-                prefersReducedMotion
-                  ? undefined
-                  : {
-                      y: -3,
-                      transition: {
-                        type: "spring",
-                        stiffness: 340,
-                        damping: 26,
-                      },
-                    }
-              }
-              className="group h-full min-h-[178px] rounded-xl border border-[#E8DDBB] bg-[#FFFDF0] p-4 transition-[border-color,box-shadow] duration-200 hover:border-[#D6C28A] hover:shadow-[0_12px_28px_rgba(58,46,14,0.08)] sm:p-5"
-            >
-              <span className="grid size-11 place-items-center rounded-xl border border-[#E5D8AD] bg-[#FBF6E3] text-[#947123] transition-colors duration-200 group-hover:bg-[#F7EDC9]">
-                <Icon aria-hidden="true" size={21} />
-              </span>
-              <h3 className="mt-4 font-bold text-[#191919]">{title}</h3>
-              <p className="mt-1.5 text-sm leading-6 text-[#625D4C]">
-                {description}
-              </p>
-            </motion.article>
-          ))}
+          </span>
         </div>
-      </section>
-    </PageLayout>
+      </div>
+    </section>
   );
 }

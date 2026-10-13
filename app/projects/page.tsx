@@ -18,6 +18,16 @@ function getHttpUrl(value: string | null): string | null {
   }
 }
 
+function formatGitHubDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date unavailable";
+
+  return new Intl.DateTimeFormat("en", {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  }).format(date);
+}
+
 function ProjectCorridor({
   repositories,
 }: {
@@ -83,6 +93,11 @@ function RepositoryCard({
 }) {
   const sourceUrl = getHttpUrl(repository.url);
   const homepageUrl = getHttpUrl(repository.homepage);
+  const repositoryLanguages = repository.languages ?? [];
+  const languageBytes = repositoryLanguages.reduce(
+    (total, language) => total + language.bytes,
+    0
+  );
 
   return (
     <article className="group flex min-w-0 flex-col rounded-2xl border border-[#E8DDBB] bg-[#FFFDF0] p-4 shadow-[0_8px_24px_rgba(58,46,14,0.04)] transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-[#D8C58E] hover:shadow-[0_14px_32px_rgba(58,46,14,0.09)] sm:p-5">
@@ -90,11 +105,21 @@ function RepositoryCard({
         <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#80631F]">
           Work / {String(index + 1).padStart(2, "0")}
         </span>
-        {repository.language && (
-          <span className="max-w-[60%] truncate rounded-full border border-[#E5D8AD] bg-[#FBF5DD] px-2.5 py-1 text-xs font-semibold text-[#785C19]">
-            {repository.language}
+        <div className="flex min-w-0 flex-wrap justify-end gap-1.5">
+          <span className="rounded-full border border-[#E5D8AD] bg-[#FBF5DD] px-2.5 py-1 text-xs font-semibold text-[#785C19]">
+            {repository.visibility}
           </span>
-        )}
+          {repository.isFork && (
+            <span className="rounded-full border border-[#E5D8AD] px-2.5 py-1 text-xs font-semibold text-[#625D4C]">
+              Fork
+            </span>
+          )}
+          {repository.isArchived && (
+            <span className="rounded-full border border-[#E5D8AD] px-2.5 py-1 text-xs font-semibold text-[#625D4C]">
+              Archived
+            </span>
+          )}
+        </div>
       </div>
 
       <div
@@ -121,6 +146,25 @@ function RepositoryCard({
         {repository.description || "Description not available."}
       </p>
 
+      <dl className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-[#FBF6E3] px-3 py-2.5 text-xs">
+        <div className="min-w-0">
+          <dt className="text-[#706951]">Created</dt>
+          <dd className="mt-0.5 font-semibold text-[#423A28]">
+            <time dateTime={repository.createdAt}>
+              {formatGitHubDate(repository.createdAt)}
+            </time>
+          </dd>
+        </div>
+        <div className="min-w-0">
+          <dt className="text-[#706951]">Last updated</dt>
+          <dd className="mt-0.5 font-semibold text-[#423A28]">
+            <time dateTime={repository.updatedAt}>
+              {formatGitHubDate(repository.updatedAt)}
+            </time>
+          </dd>
+        </div>
+      </dl>
+
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-[#625D4C]">
         {repository.language && (
           <span className="inline-flex items-center gap-1.5">
@@ -137,6 +181,42 @@ function RepositoryCard({
           {repository.forks}
         </span>
       </div>
+
+      {repository.topics.length > 0 && (
+        <ul
+          aria-label={`${repository.name} topics`}
+          className="mt-3 flex flex-wrap gap-1.5"
+        >
+          {repository.topics.map((topic) => (
+            <li
+              key={topic}
+              className="rounded-full border border-[#E8DDBB] px-2 py-1 text-[11px] text-[#625D4C]"
+            >
+              {topic}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {repositoryLanguages.length > 0 && (
+        <div className="mt-3 border-t border-[#F0E7C9] pt-3">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-[#706951]">
+            Language bytes by source share
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-1.5">
+            {repositoryLanguages.map((language) => (
+              <li
+                key={language.name}
+                className="rounded-full bg-[#F8F0C9] px-2.5 py-1 text-xs font-semibold text-[#785C19]"
+              >
+                {language.name}
+                {languageBytes > 0 &&
+                  ` · ${((language.bytes / languageBytes) * 100).toFixed(1)}%`}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="mt-4 flex flex-wrap gap-2 border-t border-[#F0E7C9] pt-3">
         {sourceUrl && (
@@ -210,7 +290,9 @@ export default function ProjectsPage() {
                 ? String(repositories.length).padStart(2, "0")
                 : loading
                   ? "—"
-                  : "00"}
+                  : error
+                    ? "—"
+                    : "00"}
             </p>
             <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#706951]">
               repositories
