@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type {
   GitHubContributionCalendar,
@@ -22,7 +23,13 @@ export default function GitHubContributionCalendar({
   onYearChange,
   linkHref,
 }: GitHubContributionCalendarProps) {
-  const currentYear = new Date().getUTCFullYear();
+  const [currentYear, setCurrentYear] = useState(2026);
+  useEffect(() => {
+    const actualCurrentYear = new Date().getUTCFullYear();
+    setCurrentYear((year) =>
+      year === actualCurrentYear ? year : actualCurrentYear
+    );
+  }, []);
   const contributionDays =
     calendar?.available && calendar.year === year
       ? calendar.weeks.flatMap((week) => week.contributionDays)
