@@ -108,6 +108,7 @@ export function useGitHubData(year?: number): GitHubState & {
       loading: true,
       rateLimited: false,
       retryAt: null,
+      requestKey,
       reload,
     };
   }

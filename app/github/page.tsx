@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import GitHubContributionCalendar from "@/components/GitHubContributionCalendar";
 import { PageHeader, PageLayout } from "@/components/PageLayout";
@@ -18,7 +18,13 @@ function formatGitHubDate(value: string, withTime = false): string {
 }
 
 export default function GitHubPage() {
-  const [year, setYear] = useState(() => new Date().getUTCFullYear());
+  const [year, setYear] = useState(2026);
+  useEffect(() => {
+    const currentYear = new Date().getUTCFullYear();
+    setYear((selectedYear) =>
+      selectedYear === currentYear ? selectedYear : currentYear
+    );
+  }, []);
   const { data, error, loading, rateLimited, retryAt, reload } =
     useGitHubData(year);
   const stats = [
